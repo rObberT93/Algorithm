@@ -1,2 +1,2 @@
-# Algorithm
-c++Algorithm
+算法导论和一些基本算法
+使用c++实现
