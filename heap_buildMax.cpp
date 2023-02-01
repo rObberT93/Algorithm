@@ -9,9 +9,13 @@ typedef struct _Heap {
 	int capacity;	//当前的存储容量
 }Heap;
 
-bool initHeap(Heap& heap, int* original, int size);
-static void buildHeap(Heap& heap);
-static void adjustDown(Heap& heap, int index);
+
+bool initHeap(Heap& heap, int* original, int size);//初始化堆
+static void buildHeap(Heap& heap);//建立最大堆
+static void adjustDown(Heap& heap, int index);//向下调整具体步骤
+static bool insertHeap(Heap& heap, int value);//插入元素
+static void adjustUp(Heap& heap, int index);//向上比较，维护最大堆
+static bool popMax(Heap& heap, int& value);//弹出最大元素
 
 //初始化堆
 bool initHeap(Heap& heap, int* original, int size) {
@@ -63,8 +67,58 @@ void adjustDown(Heap& heap, int index) {
 		}
 	}
 }
-int main() {
+
+//插入元素
+bool insertHeap(Heap& heap, int value) {
+	if (heap.size == heap.capacity) {
+		fprintf(stderr, "栈空间耗尽!\n");
+		return false;
+	}
  
+	int index = heap.size;
+	heap.arr[heap.size++] = value;//先赋值value，再size++
+	adjustUp(heap, index);
+    return true;
+}
+ 
+void adjustUp(Heap& heap, int index) {
+	if (index < 0 || index >= heap.size) {
+		//如果只有一个结点（插入的结点）inedx<0，或者大于堆的最大值，return掉
+		return;
+	}
+	int temp = heap.arr[index];//temp为插入的值
+	while (index > 0) {
+		
+		int parent = (index - 1) / 2;
+		if (parent >= 0) {   //如果索引没有出界，就执行想要操作
+			if (heap.arr[parent] < temp) {
+				heap.arr[index] = heap.arr[parent];
+				heap.arr[parent] = temp;
+				index = parent;
+			}
+			else break;    //如果没有比父结点大，则跳出
+		}
+		else break;  //越界，结束循环
+	}
+}
+
+//弹出根节点 最大元素
+bool popMax(Heap& heap, int& value) {
+	if (heap.size < 1)return false;
+	value = heap.arr[0];
+ 
+	//将size-1的位置值赋给根节点，size本身又--
+	/*相当于
+		heap.arr[0] = heap.arr[heap.size-1];
+		heap.size--;
+	*/
+	heap.arr[0] = heap.arr[--heap.size];
+	adjustDown(heap, 0);  //向下执行堆调整
+	return true;
+}
+
+int main() 
+{
 	Heap hp;
 	int orignArry[] = { 1,2,3,87,93,82,92,86,95 };
  
@@ -76,6 +130,15 @@ int main() {
 	for (int i = 0; i < hp.size; i++) {
 		cout <<"arr["<<i<<"]="<<hp.arr[i] << endl;
 	}
+    insertHeap(hp, 99);
+	printf("在堆中插入新的元素99, 插入结果：\n");
+	for (int i = 0; i < hp.size; i++) {
+		cout << "第" << i << "个数为：" << hp.arr[i] << endl;
+    }
+    int value;
+	while (popMax(hp, value)) {
+		cout << "依次出列最大元素：" << value << endl;
+    }
 	system("pause");
 	return 0;
 }
